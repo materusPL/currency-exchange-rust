@@ -37,7 +37,7 @@ struct Cli
     #[arg(short, long)]
     list: bool,
 
-    /// List currencies
+    /// List exchange rate for currency
     #[arg(short = 'L', long = "list-rates")]
     list_rates: Option<String>,
 }

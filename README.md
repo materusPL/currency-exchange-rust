@@ -22,7 +22,7 @@ Options:
   -r, --recreate-cache           Recrate cache
   -i, --interactive              Interactive mode
   -l, --list                     List currencies
-  -L, --list-rates <LIST_RATES>  List currencies
+  -L, --list-rates <LIST_RATES>  List exchange rate for currency
   -h, --help                     Print help
 
 ```
