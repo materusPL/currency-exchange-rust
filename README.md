@@ -10,21 +10,20 @@ currency-exchange --interactive
 ```
 More information on usage:
 ```
-Usage: currency-exchange [OPTIONS] [CURRENCY_FROM] [CURRENCY_TO] [VALUE]
+Usage: currency-exchange [OPTIONS] [Currency input] [Currency target] [Amount]
 
 Arguments:
-  [CURRENCY_FROM]  Currency code to exchange from
-  [CURRENCY_TO]    Currency code to exchange to
-  [VALUE]          Currency amount to exchange
+  [Currency input]   Currency code to exchange from
+  [Currency target]  Currency code to exchange to
+  [Amount]           Currency amount to exchange
 
 Options:
-  -k, --set-api-key <API_KEY>    Set api key
-  -r, --recreate-cache           Recrate cache
-  -i, --interactive              Interactive mode
-  -l, --list                     List currencies
-  -L, --list-rates <LIST_RATES>  List exchange rate for currency
-  -h, --help                     Print help
-
+  -k, --set-api-key <API_KEY>  Set api key
+  -r, --recreate-cache         Recrate cache
+  -i, --interactive            Interactive mode
+  -l, --list                   List currencies
+  -L, --list-rates <currency>  List exchange rate for currency
+  -h, --help                   Print help
 ```
 # Build
 Needs rust and cargo, build tested on rust v1.76.0\

@@ -17,10 +17,13 @@ mod requests;
 struct Cli
 {
     /// Currency code to exchange from
+    #[arg(value_names = ["Currency input"])]
     currency_from: Option<String>,
     /// Currency code to exchange to
+    #[arg(value_names = ["Currency target"])]
     currency_to: Option<String>,
     /// Currency amount to exchange
+    #[arg(value_names = ["Amount"])]
     value: Option<String>,
 
     /// Set api key
@@ -38,7 +41,7 @@ struct Cli
     list: bool,
 
     /// List exchange rate for currency
-    #[arg(short = 'L', long = "list-rates")]
+    #[arg(short = 'L', long = "list-rates", value_names = ["currency"])]
     list_rates: Option<String>,
 }
 async fn setup_key(key: String) -> Result<bool, Box<dyn std::error::Error>>
