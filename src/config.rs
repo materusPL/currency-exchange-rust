@@ -1,7 +1,6 @@
 use std::{
     env::{temp_dir, var_os},
-    path::PathBuf,
-    process::exit,
+    path::PathBuf
 };
 
 pub const CACHE_LOCATION_ENV_NAME: &str = "CURRENCY_CACHE";
