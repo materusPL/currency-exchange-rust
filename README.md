@@ -19,7 +19,7 @@ Arguments:
 
 Options:
   -k, --set-api-key <API_KEY>  Set api key
-  -r, --recreate-cache         Recrate cache
+  -r, --recreate-cache         Recreate cache
   -i, --interactive            Interactive mode
   -l, --list                   List currencies
   -L, --list-rates <currency>  List exchange rate for currency

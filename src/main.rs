@@ -29,7 +29,7 @@ struct Cli
     /// Set api key
     #[arg(short = 'k', long = "set-api-key")]
     api_key: Option<String>,
-    /// Recrate cache
+    /// Recreate cache
     #[arg(short = 'r', long = "recreate-cache")]
     recreate_cache: bool,
     /// Interactive mode
