@@ -4,8 +4,7 @@ use crate::cache::{self, get_api_key};
 use crate::config::get_endpoint;
 use serde::Deserialize;
 #[derive(PartialEq)]
-pub enum Status
-{
+pub enum Status {
     OK,
     INVALID,
     LIMIT,
@@ -13,13 +12,11 @@ pub enum Status
 }
 
 #[derive(Deserialize)]
-struct CurrencyCodes
-{
+struct CurrencyCodes {
     supported_codes: Vec<[String; 2]>,
 }
 #[derive(Deserialize)]
-struct ConversionRates
-{
+struct ConversionRates {
     base_code: String,
     time_next_update_unix: u64,
 
@@ -27,14 +24,12 @@ struct ConversionRates
 }
 
 #[derive(Deserialize)]
-struct Err
-{
+struct Err {
     #[serde(rename = "error-type")]
     error_type: String,
 }
 
-pub async fn get_rates(code: &String) -> Result<Status, reqwest::Error>
-{
+pub async fn get_rates(code: &String) -> Result<Status, reqwest::Error> {
     let response = reqwest::get(format!(
         "{}{}{}{}",
         get_endpoint(),
@@ -65,8 +60,7 @@ pub async fn get_rates(code: &String) -> Result<Status, reqwest::Error>
 
     Ok(Status::ERROR)
 }
-pub async fn get_currencies() -> Result<Status, reqwest::Error>
-{
+pub async fn get_currencies() -> Result<Status, reqwest::Error> {
     let response = reqwest::get(format!(
         "{}{}{}",
         get_endpoint(),

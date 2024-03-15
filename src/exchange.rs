@@ -1,8 +1,7 @@
 use crate::*;
 use rust_decimal::prelude::*;
 use rusty_money::{iso::find, ExchangeRate, Money};
-pub async fn update_rate(code: &String)
-{
+pub async fn update_rate(code: &String) {
     if cache::get_next_update(code).expect("Error getting next update time from cache")
         <= config::get_current_time()
     {
@@ -10,25 +9,20 @@ pub async fn update_rate(code: &String)
             .await
             .expect("Error while fetching rates");
         if status == requests::Status::INVALID {
-            config::println_and_exit("Invalid api key when getting rates")
+            panic!("Invalid api key when getting rates")
         } else if status == requests::Status::LIMIT {
-            config::println_and_exit("Exceeded API limit when getting rates")
+            panic!("Exceeded API limit when getting rates")
         } else if status == requests::Status::ERROR {
-            config::println_and_exit("Unknown error when getting rates")
+            panic!("Unknown error when getting rates")
         }
     }
 }
-pub async fn get_rate(code_from: &String, code_to: &String) -> String
-{
+pub async fn get_rate(code_from: &String, code_to: &String) -> String {
     if !cache::check_code(code_from).expect("Error on getting code status") {
-        config::println_and_exit(
-            format!("Code {} doesn't exists, use correct code!", code_from).as_str(),
-        )
+        panic!("Code {} doesn't exists, use correct code!", code_from);
     }
     if !cache::check_code(code_to).expect("Error on getting code status") {
-        config::println_and_exit(
-            format!("Code {} doesn't exists, use correct code!", code_to).as_str(),
-        )
+        panic!("Code {} doesn't exists, use correct code!", code_to);
     }
     if (!cache::check_exchange(code_from, code_to).expect("Error on getting exchange status"))
         || (cache::get_next_update(code_from).expect("Error getting next update time from cache")
@@ -39,19 +33,18 @@ pub async fn get_rate(code_from: &String, code_to: &String) -> String
     cache::get_rate(code_from, code_to).expect("Error when getting cached rate")
 }
 
-pub async fn convert_value(code_from: &String, code_to: &String, value: &String)
-{
+pub async fn convert_value(code_from: &String, code_to: &String, value: &String) {
     if value.parse::<f64>().is_err() {
-        config::println_and_exit(format!("{} is not a number!", value).as_str())
+        panic!("{} is not a number!", value);
     }
     let text_rate = get_rate(code_from, code_to).await;
     let from_currency = find(code_from);
     if from_currency.is_none() {
-        config::println_and_exit(format!("{} not found in ISO formats", code_from).as_str())
+        panic!("{} not found in ISO formats", code_from);
     }
     let to_currency = find(code_to);
     if to_currency.is_none() {
-        config::println_and_exit(format!("{} not found in ISO formats", code_to).as_str())
+        panic!("{} not found in ISO formats", code_to);
     }
 
     let rate = Decimal::from_str(&text_rate).unwrap();

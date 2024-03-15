@@ -5,12 +5,11 @@ use std::{
 
 use rusqlite::{Connection, Result};
 
-use crate::config::{get_cache_path, println_and_exit};
+use crate::config::get_cache_path;
 
 const CANNOT_CLOSE_MSG: &str = "Couldn't close sqlite connection";
 
-pub fn check_code(code: &String) -> Result<bool>
-{
+pub fn check_code(code: &String) -> Result<bool> {
     let conn = Connection::open(get_cache_path())?;
     let exists: bool = conn.query_row(
         "SELECT EXISTS(SELECT code FROM currencies WHERE currencies.code = UPPER($1))",
@@ -22,18 +21,20 @@ pub fn check_code(code: &String) -> Result<bool>
     Ok(exists)
 }
 
-pub fn list_currencies() -> Result<Vec<[String;2]>>
-{
+pub fn list_currencies() -> Result<Vec<[String; 2]>> {
     let conn = Connection::open(get_cache_path())?;
     let mut stmt = conn.prepare("SELECT code, text FROM currencies ORDER BY code")?;
     let ret = stmt
-        .query_map([], |row| {let v:Result<[String;2]> = Ok([row.get(0)?,row.get(1)?]); v})
+        .query_map([], |row| {
+            let v: Result<[String; 2]> = Ok([row.get(0)?, row.get(1)?]);
+            v
+        })
         .expect("Error while listing currencies");
-    
-    let mut result: Vec<[String;2]> = Vec::new();
+
+    let mut result: Vec<[String; 2]> = Vec::new();
     for code in ret {
         let i = code.unwrap();
-        let z = [i[0].clone(),i[1].clone()];
+        let z = [i[0].clone(), i[1].clone()];
         result.push(z);
     }
     stmt.finalize()?;
@@ -41,20 +42,22 @@ pub fn list_currencies() -> Result<Vec<[String;2]>>
     Ok(result)
 }
 
-
-
-pub fn list_rates(code_from: &String ) -> Result<Vec<[String;2]>>
-{
+pub fn list_rates(code_from: &String) -> Result<Vec<[String; 2]>> {
     let conn = Connection::open(get_cache_path())?;
-    let mut stmt = conn.prepare("SELECT code_to, rate FROM exchange_rates WHERE code_from = $1 ORDER BY code_to")?;
+    let mut stmt = conn.prepare(
+        "SELECT code_to, rate FROM exchange_rates WHERE code_from = $1 ORDER BY code_to",
+    )?;
     let ret = stmt
-        .query_map([code_from], |row| {let v:Result<[String;2]> = Ok([row.get(0)?,row.get(1)?]); v})
+        .query_map([code_from], |row| {
+            let v: Result<[String; 2]> = Ok([row.get(0)?, row.get(1)?]);
+            v
+        })
         .expect("Error while listing rates");
-    
-    let mut result: Vec<[String;2]> = Vec::new();
+
+    let mut result: Vec<[String; 2]> = Vec::new();
     for code in ret {
         let i = code.unwrap();
-        let z = [i[0].clone(),i[1].clone()];
+        let z = [i[0].clone(), i[1].clone()];
         result.push(z);
     }
     stmt.finalize()?;
@@ -62,8 +65,7 @@ pub fn list_rates(code_from: &String ) -> Result<Vec<[String;2]>>
     Ok(result)
 }
 
-pub fn check_exchange(code_from: &String, code_to: &String) -> Result<bool>
-{
+pub fn check_exchange(code_from: &String, code_to: &String) -> Result<bool> {
     let conn = Connection::open(get_cache_path())?;
     let exists: bool = conn.query_row(
         "SELECT EXISTS(SELECT code_from, code_to 
@@ -77,8 +79,7 @@ pub fn check_exchange(code_from: &String, code_to: &String) -> Result<bool>
     Ok(exists)
 }
 
-pub fn get_rate(code_from: &String, code_to: &String) -> Result<String>
-{
+pub fn get_rate(code_from: &String, code_to: &String) -> Result<String> {
     let conn = Connection::open(get_cache_path())?;
     let rate: String = conn.query_row(
         "SELECT rate 
@@ -91,8 +92,7 @@ pub fn get_rate(code_from: &String, code_to: &String) -> Result<String>
 
     Ok(rate)
 }
-pub fn get_next_update(code: &String) -> Result<u64>
-{
+pub fn get_next_update(code: &String) -> Result<u64> {
     let conn = Connection::open(get_cache_path())?;
     let next_update: u64 = conn.query_row(
         "SELECT next_update FROM currencies WHERE currencies.code = UPPER($1)",
@@ -108,8 +108,7 @@ pub fn add_rates(
     next_update: u64,
     code_from: &String,
     rates: &HashMap<String, serde_json::Value>,
-) -> Result<()>
-{
+) -> Result<()> {
     let conn = Connection::open(get_cache_path())?;
 
     for (code_to, rate) in rates {
@@ -133,8 +132,7 @@ pub fn add_rates(
     Ok(())
 }
 
-pub fn add_code(code: [String; 2]) -> Result<()>
-{
+pub fn add_code(code: [String; 2]) -> Result<()> {
     let conn = Connection::open(get_cache_path())?;
     conn.execute(
         "
@@ -146,8 +144,7 @@ pub fn add_code(code: [String; 2]) -> Result<()>
     conn.close().expect(CANNOT_CLOSE_MSG);
     Ok(())
 }
-pub fn get_api_key() -> Result<String>
-{
+pub fn get_api_key() -> Result<String> {
     let conn = Connection::open(get_cache_path())?;
     let api_key: String = conn.query_row(
         "SELECT value FROM config WHERE config.name = 'API_KEY'",
@@ -158,8 +155,7 @@ pub fn get_api_key() -> Result<String>
 
     Ok(api_key)
 }
-pub fn set_api_key(key: String) -> Result<()>
-{
+pub fn set_api_key(key: String) -> Result<()> {
     let conn = Connection::open(get_cache_path())?;
     conn.execute(
         "
@@ -174,11 +170,10 @@ pub fn set_api_key(key: String) -> Result<()>
     Ok(())
 }
 
-pub fn create_cache() -> Result<()>
-{
+pub fn create_cache() -> Result<()> {
     let path = &get_cache_path();
     if path.is_dir() {
-        println_and_exit("Specified path cache path is dir, not file")
+        panic!("Specified path cache path is dir, not file")
     }
     if path.exists() {
         match remove_file(path) {
@@ -186,10 +181,10 @@ pub fn create_cache() -> Result<()>
             Err(_e) => match metadata(path) {
                 Ok(md) => {
                     if md.permissions().readonly() {
-                        println_and_exit("Can't modify file");
+                        panic!("Can't modify file");
                     }
                 }
-                Err(_e) => println_and_exit("Unknown error while trying to remove old database"),
+                Err(_e) => panic!("Unknown error while trying to remove old database"),
             },
         }
     }

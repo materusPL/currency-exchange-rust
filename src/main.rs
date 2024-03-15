@@ -14,8 +14,7 @@ mod requests;
 
 #[derive(Parser)]
 #[command(about, long_about = None, arg_required_else_help = true)]
-struct Cli
-{
+struct Cli {
     /// Currency code to exchange from
     #[arg(value_names = ["Currency input"])]
     currency_from: Option<String>,
@@ -44,8 +43,7 @@ struct Cli
     #[arg(short = 'L', long = "list-rates", value_names = ["currency"])]
     list_rates: Option<String>,
 }
-async fn setup_key(key: String) -> Result<bool, Box<dyn std::error::Error>>
-{
+async fn setup_key(key: String) -> Result<bool, Box<dyn std::error::Error>> {
     set_api_key(key)?;
     let status = get_currencies().await?;
     if status == requests::Status::INVALID {
@@ -65,8 +63,7 @@ async fn setup_key(key: String) -> Result<bool, Box<dyn std::error::Error>>
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>>
-{
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Cli::parse();
 
     let all_args =
@@ -75,7 +72,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>>
         args.currency_from.is_some() && (args.currency_to.is_none() || args.value.is_none());
 
     if args.interactive && (all_args || wrong_args) {
-        config::println_and_exit("Do not provide codes and value with --interactive")
+        panic!("Do not provide codes and value with --interactive")
     }
     if args.recreate_cache || !config::get_cache_path().exists() {
         create_cache()?;
@@ -97,7 +94,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>>
             .len()
             > 0)
         {
-            config::println_and_exit("API Key is not set up!");
+            panic!("API Key is not set up!");
         }
         if args.list {
             let currencies = cache::list_currencies()?;
@@ -108,17 +105,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>>
             let code = args.list_rates.unwrap().clone();
             let check = check_code(&code)?;
             if !check {
-                config::println_and_exit(format!("Code {} not found", code).as_str());
+                panic!("Code {} not found", code);
             }
             exchange::update_rate(&code).await;
             let rates = cache::list_rates(&code)?;
             for rate in rates {
-                println!("{} to {} rate: {}", code ,rate[0], rate[1]);
+                println!("{} to {} rate: {}", code, rate[0], rate[1]);
             }
         } else if wrong_args {
-            config::println_and_exit(
-                "Not all args specified, provide 'currency from', 'currency to' and 'amount'",
-            );
+            panic!("Not all args specified, provide 'currency from', 'currency to' and 'amount'");
         } else if all_args {
             convert_value(
                 &args.currency_from.unwrap().to_uppercase(),
@@ -132,8 +127,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>>
     }
     Ok(())
 }
-async fn interactive() -> Result<(), Box<dyn std::error::Error>>
-{
+async fn interactive() -> Result<(), Box<dyn std::error::Error>> {
     let mut key_setup = cache::get_api_key()
         .expect("Error while getting api key")
         .len()
