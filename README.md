@@ -42,7 +42,7 @@ docker build -t currency-exchange .
 
 To run use:
 ```
-docker run --rm -v /tmp:/tmp:rw currency-exchange <ARGUMENTS>
+docker run -it --rm -v /tmp:/tmp:rw currency-exchange <ARGUMENTS>
 ```
 
 
