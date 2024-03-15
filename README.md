@@ -25,10 +25,24 @@ Options:
   -L, --list-rates <currency>  List exchange rate for currency
   -h, --help                   Print help
 ```
-# Build
+## Build
 Needs rust and cargo, build tested on rust v1.76.0\
 To build run command
 ```
 cargo build -r
 ```
+
+## Docker
+
+To use with docker
+Build image
+```
+docker build -t currency-exchange .
+```
+
+To run use:
+```
+docker run --rm -v /tmp:/tmp:rw currency-exchange <ARGUMENTS>
+```
+
 
