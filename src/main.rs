@@ -11,6 +11,8 @@ mod cache;
 mod config;
 mod exchange;
 mod requests;
+#[cfg(test)]
+mod tests;
 
 #[derive(Parser)]
 #[command(about, long_about = None, arg_required_else_help = true)]
