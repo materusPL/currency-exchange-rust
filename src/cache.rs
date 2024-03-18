@@ -192,7 +192,7 @@ pub fn create_cache() -> Result<()> {
 
     conn.execute(
         "
-    CREATE TABLE config (
+    CREATE TABLE IF NOT EXISTS config (
         name   TEXT PRIMARY KEY,
         value  TEXT NOT NULL
     )",
@@ -201,7 +201,7 @@ pub fn create_cache() -> Result<()> {
 
     conn.execute(
         "
-    CREATE TABLE currencies (
+    CREATE TABLE IF NOT EXISTS currencies (
         code   TEXT PRIMARY KEY,
         text   TEXT NOT NULL,
         next_update  TIME NOT NULL
@@ -211,7 +211,7 @@ pub fn create_cache() -> Result<()> {
 
     conn.execute(
         "
-    CREATE TABLE exchange_rates (
+    CREATE TABLE IF NOT EXISTS exchange_rates (
         code_from   TEXT NOT NULL,
         code_to   TEXT NOT NULL,
         rate    TEXT NOT NULL,
@@ -222,7 +222,7 @@ pub fn create_cache() -> Result<()> {
 
     conn.execute(
         "
-    INSERT INTO config (name, value) VALUES (
+    INSERT OR IGNORE INTO config (name, value) VALUES (
         'API_KEY',
         ''
     )
