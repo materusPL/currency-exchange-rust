@@ -34,15 +34,10 @@ cargo build -r
 
 ## Docker
 
-To use with docker
-Build image
-```
-docker build -t currency-exchange .
-```
 
-To run use:
+To run with docker use:
 ```
-docker run --rm -v /tmp:/tmp:rw currency-exchange <ARGUMENTS>
+docker run -it --rm -v /tmp:/tmp:rw materus/currency-exchange:latest <ARGUMENTS>
 ```
 
 
