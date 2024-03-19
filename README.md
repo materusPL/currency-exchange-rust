@@ -33,7 +33,7 @@ cargo build -r
 ```
 
 ## Docker
-
+[![status](https://github.com/materusPL/currency-exchange-rust/actions/workflows/main.yml/badge.svg)](https://hub.docker.com/repository/docker/materus/currency-exchange)
 
 To run with docker use:
 ```
