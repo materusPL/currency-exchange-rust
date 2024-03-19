@@ -25,6 +25,8 @@ Options:
   -L, --list-rates <currency>  List exchange rate for currency
   -h, --help                   Print help
 ```
+Cache and api key is stored by default in `<TMPDIR>/currencyCache.db`. This location and filename can be overriden by setting up `CURRENCY_CACHE` env variable.
+
 ## Build
 Needs rust and cargo, build tested on rust v1.76.0\
 To build run command
