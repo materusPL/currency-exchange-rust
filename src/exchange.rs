@@ -56,7 +56,7 @@ pub async fn convert_value(code_from: &String, code_to: &String, value: &String)
         let result = ex.convert(from_money).expect("Error while conversion");
         println!("Equals: {}", result.to_string())
     } else {
-        println!("{}", from_money.to_string())
+        println!("Equals: {}", from_money.to_string())
     }
     println!("Exchange rate: {}", text_rate);
 }
