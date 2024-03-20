@@ -25,7 +25,7 @@ Options:
   -L, --list-rates <currency>  List exchange rate for currency
   -h, --help                   Print help
 ```
-Cache and api key is stored by default in `<TMPDIR>/currencyCache.db`. This location and filename can be overriden by setting up `CURRENCY_CACHE` env variable.
+Cache and api key is stored by default in `<XDG_CACHE_HOME>/currencyCache.db` or `<TMPDIR>/currencyCache.db` if `XDG_CACHE_HOME` is not set. This location and filename can be overriden by setting up `CURRENCY_CACHE` env variable.
 
 ## Build
 Needs rust and cargo, build tested on rust v1.76.0\
@@ -41,5 +41,7 @@ To run with docker use:
 ```
 docker run -it --rm -v /tmp:/tmp:rw materus/currency-exchange:latest <ARGUMENTS>
 ```
+
+Dockerfile sets up `CURRENCY_CACHE` to `/tmp/docker_currency_cache.db`, to keep cache u should mount this file or tmp directory for example with `-v /tmp:/tmp:rw` in docker run cmdline.
 
 
