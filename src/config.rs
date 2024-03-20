@@ -1,6 +1,6 @@
 use std::{
     env::{temp_dir, var_os},
-    path::PathBuf
+    path::PathBuf,
 };
 
 pub const CACHE_LOCATION_ENV_NAME: &str = "CURRENCY_CACHE";
@@ -18,12 +18,19 @@ pub fn get_endpoint() -> String {
 }
 pub fn get_cache_path() -> PathBuf {
     let mut path: PathBuf = PathBuf::new();
+
     match var_os(CACHE_LOCATION_ENV_NAME) {
         Some(val) => path.push(val),
-        None => {
-            path.push(temp_dir());
-            path.push("currencyCache.db");
-        }
+        None => match var_os("XDG_CACHE_HOME") {
+            Some(val) => {
+                path.push(val);
+                path.push("currencyCache.db");
+            }
+            None => {
+                path.push(temp_dir());
+                path.push("currencyCache.db");
+            }
+        },
     }
 
     path
