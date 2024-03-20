@@ -67,7 +67,6 @@ async fn setup_key(key: String) -> Result<bool, Box<dyn std::error::Error>> {
 #[tokio::main]
 async fn main() -> Result<ExitCode, Box<dyn std::error::Error>> {
     let args = Cli::parse();
-
     let all_args =
         args.currency_from.is_some() && args.currency_to.is_some() && args.value.is_some();
     let wrong_args =
@@ -77,8 +76,17 @@ async fn main() -> Result<ExitCode, Box<dyn std::error::Error>> {
         println!("Do not provide codes and value with --interactive");
         return Ok(ExitCode::FAILURE);
     }
+    if args.interactive && (args.list || args.list_rates.is_some()) {
+        println!("Can't use --list or --list-rates with --interactive");
+        return Ok(ExitCode::FAILURE);
+    }
+    if args.currency_from.is_some() && (args.list || args.list_rates.is_some()) {
+        println!("Can't use --list or --list-rates while providing exchange data");
+        return Ok(ExitCode::FAILURE);
+    }
     if args.recreate_cache || !config::get_cache_path().exists() {
         create_cache()?;
+        println!("New cache was created");
     }
     match args.api_key {
         None => {}
@@ -97,7 +105,12 @@ async fn main() -> Result<ExitCode, Box<dyn std::error::Error>> {
             .len()
             > 0)
         {
+            
             println!("API Key is not set up!");
+            return Ok(ExitCode::FAILURE);
+        }
+        if args.list && args.list_rates.is_some(){
+            println!("Can't use --list with --list-rates");
             return Ok(ExitCode::FAILURE);
         }
         if args.list {
