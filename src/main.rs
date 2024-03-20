@@ -1,4 +1,4 @@
-use std::io::Write;
+use std::{io::Write, process::ExitCode};
 
 use crate::{
     cache::{create_cache, set_api_key},
@@ -65,7 +65,7 @@ async fn setup_key(key: String) -> Result<bool, Box<dyn std::error::Error>> {
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> Result<ExitCode, Box<dyn std::error::Error>> {
     let args = Cli::parse();
 
     let all_args =
@@ -75,7 +75,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     if args.interactive && (all_args || wrong_args) {
         println!("Do not provide codes and value with --interactive");
-        return Ok(());
+        return Ok(ExitCode::FAILURE);
     }
     if args.recreate_cache || !config::get_cache_path().exists() {
         create_cache()?;
@@ -87,7 +87,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .await
                 .expect("Unknown error while setting up key");
             if !res {
-                return Ok(());
+                return Ok(ExitCode::FAILURE);
             }
         }
     }
@@ -98,7 +98,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             > 0)
         {
             println!("API Key is not set up!");
-            return Ok(());
+            return Ok(ExitCode::FAILURE);
         }
         if args.list {
             let currencies = cache::list_currencies()?;
@@ -110,7 +110,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let check = check_code(&code)?;
             if !check {
                 println!("Code {} not found", code);
-                return Ok(());
+                return Ok(ExitCode::FAILURE);
             }
             exchange::update_rate(&code).await;
             let rates = cache::list_rates(&code)?;
@@ -119,7 +119,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         } else if wrong_args {
             println!("Not all args specified, provide 'currency from', 'currency to' and 'amount'");
-            return Ok(());
+            return Ok(ExitCode::FAILURE);
         } else if all_args {
             convert_value(
                 &args.currency_from.unwrap().to_uppercase(),
@@ -131,7 +131,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     } else {
         interactive().await?;
     }
-    Ok(())
+    Ok(ExitCode::SUCCESS)
 }
 async fn interactive() -> Result<(), Box<dyn std::error::Error>> {
     let mut key_setup = cache::get_api_key()
