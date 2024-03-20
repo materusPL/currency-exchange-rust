@@ -86,7 +86,7 @@ async fn main() -> Result<ExitCode, Box<dyn std::error::Error>> {
     }
     if args.recreate_cache || !config::get_cache_path().exists() {
         create_cache()?;
-        println!("New cache was created");
+        println!("New cache has been created");
     }
     match args.api_key {
         None => {}
