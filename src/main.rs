@@ -74,7 +74,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         args.currency_from.is_some() && (args.currency_to.is_none() || args.value.is_none());
 
     if args.interactive && (all_args || wrong_args) {
-        panic!("Do not provide codes and value with --interactive")
+        println!("Do not provide codes and value with --interactive");
+        return Ok(());
     }
     if args.recreate_cache || !config::get_cache_path().exists() {
         create_cache()?;
@@ -96,7 +97,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .len()
             > 0)
         {
-            panic!("API Key is not set up!");
+            println!("API Key is not set up!");
+            return Ok(());
         }
         if args.list {
             let currencies = cache::list_currencies()?;
@@ -107,7 +109,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let code = args.list_rates.unwrap().clone();
             let check = check_code(&code)?;
             if !check {
-                panic!("Code {} not found", code);
+                println!("Code {} not found", code);
+                return Ok(());
             }
             exchange::update_rate(&code).await;
             let rates = cache::list_rates(&code)?;
@@ -115,7 +118,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 println!("{} to {} rate: {}", code, rate[0], rate[1]);
             }
         } else if wrong_args {
-            panic!("Not all args specified, provide 'currency from', 'currency to' and 'amount'");
+            println!("Not all args specified, provide 'currency from', 'currency to' and 'amount'");
+            return Ok(());
         } else if all_args {
             convert_value(
                 &args.currency_from.unwrap().to_uppercase(),
