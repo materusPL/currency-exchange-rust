@@ -29,18 +29,17 @@ struct Err {
     error_type: String,
 }
 
-pub async fn get_rates(code: &String) -> Result<Status, reqwest::Error> {
-    let response = reqwest::get(format!(
+pub fn get_rates(code: &String) -> Result<Status, reqwest::Error> {
+    let response = reqwest::blocking::get(format!(
         "{}{}{}{}",
         get_endpoint(),
         get_api_key().expect("Error when getting api key from cache"),
         "/latest/",
         code.to_uppercase()
-    ))
-    .await?;
+    ))?;
     if response.status().is_success() {
         let response: ConversionRates =
-            serde_json::from_str(&response.text().await?).expect("Error when deserializng");
+            serde_json::from_str(&response.text()?).expect("Error when deserializng");
         cache::add_rates(
             response.time_next_update_unix,
             &response.base_code,
@@ -50,7 +49,7 @@ pub async fn get_rates(code: &String) -> Result<Status, reqwest::Error> {
         return Ok(Status::OK);
     } else {
         let err: Err =
-            serde_json::from_str(&response.text().await?).expect("Error when deserializng");
+            serde_json::from_str(&response.text()?).expect("Error when deserializng");
         if err.error_type == "invalid-key" {
             return Ok(Status::INVALID);
         } else if err.error_type == "quota-reached" {
@@ -60,24 +59,23 @@ pub async fn get_rates(code: &String) -> Result<Status, reqwest::Error> {
 
     Ok(Status::ERROR)
 }
-pub async fn get_currencies() -> Result<Status, reqwest::Error> {
-    let response = reqwest::get(format!(
+pub fn get_currencies() -> Result<Status, reqwest::Error> {
+    let response = reqwest::blocking::get(format!(
         "{}{}{}",
         get_endpoint(),
         get_api_key().expect("Error when getting api key from cache"),
         "/codes"
-    ))
-    .await?;
+    ))?;
     if response.status().is_success() {
         let codes: CurrencyCodes =
-            serde_json::from_str(&response.text().await?).expect("Error when deserializng");
+            serde_json::from_str(&response.text()?).expect("Error when deserializng");
         for code in codes.supported_codes {
             cache::add_code(code).expect("Error when adding code to cache");
         }
         return Ok(Status::OK);
     } else {
         let err: Err =
-            serde_json::from_str(&response.text().await?).expect("Error when deserializng");
+            serde_json::from_str(&response.text()?).expect("Error when deserializng");
         if err.error_type == "invalid-key" {
             return Ok(Status::INVALID);
         } else if err.error_type == "quota-reached" {

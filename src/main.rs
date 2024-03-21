@@ -45,9 +45,9 @@ struct Cli {
     #[arg(short = 'L', long = "list-rates", value_names = ["currency"])]
     list_rates: Option<String>,
 }
-async fn setup_key(key: String) -> Result<bool, Box<dyn std::error::Error>> {
+fn setup_key(key: String) -> Result<bool, Box<dyn std::error::Error>> {
     set_api_key(key)?;
-    let status = get_currencies().await?;
+    let status = get_currencies()?;
     if status == requests::Status::INVALID {
         set_api_key("".to_string())?;
         println!("Api Key is invalid");
@@ -64,8 +64,7 @@ async fn setup_key(key: String) -> Result<bool, Box<dyn std::error::Error>> {
     Ok(true)
 }
 
-#[tokio::main]
-async fn main() -> Result<ExitCode, Box<dyn std::error::Error>> {
+fn main() -> Result<ExitCode, Box<dyn std::error::Error>> {
     let args = Cli::parse();
     let all_args =
         args.currency_from.is_some() && args.currency_to.is_some() && args.value.is_some();
@@ -92,7 +91,6 @@ async fn main() -> Result<ExitCode, Box<dyn std::error::Error>> {
         None => {}
         Some(key) => {
             let res = setup_key(key)
-                .await
                 .expect("Unknown error while setting up key");
             if !res {
                 return Ok(ExitCode::FAILURE);
@@ -125,7 +123,7 @@ async fn main() -> Result<ExitCode, Box<dyn std::error::Error>> {
                 println!("Code {} not found", code);
                 return Ok(ExitCode::FAILURE);
             }
-            exchange::update_rate(&code).await;
+            exchange::update_rate(&code);
             let rates = cache::list_rates(&code)?;
             for rate in rates {
                 println!("{} to {} rate: {}", code, rate[0], rate[1]);
@@ -139,14 +137,13 @@ async fn main() -> Result<ExitCode, Box<dyn std::error::Error>> {
                 &args.currency_to.unwrap().to_uppercase(),
                 &args.value.unwrap(),
             )
-            .await
         }
     } else {
-        interactive().await?;
+        interactive()?;
     }
     Ok(ExitCode::SUCCESS)
 }
-async fn interactive() -> Result<(), Box<dyn std::error::Error>> {
+fn interactive() -> Result<(), Box<dyn std::error::Error>> {
     let mut key_setup = cache::get_api_key()
         .expect("Error while getting api key")
         .len()
@@ -159,7 +156,6 @@ async fn interactive() -> Result<(), Box<dyn std::error::Error>> {
             .read_line(&mut key_string)
             .expect("Did not enter a correct string");
         setup_key(key_string.trim().to_string())
-            .await
             .expect("Unknown error while setting up key");
         key_setup = cache::get_api_key()
             .expect("Error while getting api key")
@@ -216,7 +212,7 @@ async fn interactive() -> Result<(), Box<dyn std::error::Error>> {
             amount_check = true
         }
     }
-    convert_value(&code_from, &code_to, &amount).await;
+    convert_value(&code_from, &code_to, &amount);
 
     Ok(())
 }
