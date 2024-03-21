@@ -70,7 +70,7 @@ fn main() -> Result<ExitCode, Box<dyn std::error::Error>> {
         args.currency_from.is_some() && args.currency_to.is_some() && args.value.is_some();
     let wrong_args =
         args.currency_from.is_some() && (args.currency_to.is_none() || args.value.is_none());
-
+    // Checks
     if args.interactive && (all_args || wrong_args) {
         println!("Do not provide codes and value with --interactive");
         return Ok(ExitCode::FAILURE);
@@ -83,10 +83,21 @@ fn main() -> Result<ExitCode, Box<dyn std::error::Error>> {
         println!("Can't use --list or --list-rates while providing exchange data");
         return Ok(ExitCode::FAILURE);
     }
+    if args.list && args.list_rates.is_some(){
+        println!("Can't use --list with --list-rates");
+        return Ok(ExitCode::FAILURE);
+    }
+    if config::get_cache_path().is_dir()
+    {
+        println!("Specified path cache path is dir, not file");
+        return Ok(ExitCode::FAILURE);
+    }
+    // Create cache if arg provided or doesn't exist
     if args.recreate_cache || !config::get_cache_path().exists() {
         create_cache()?;
         println!("New cache has been created");
     }
+    // Set up api key if arg provided
     match args.api_key {
         None => {}
         Some(key) => {
@@ -97,7 +108,10 @@ fn main() -> Result<ExitCode, Box<dyn std::error::Error>> {
             }
         }
     }
+
+    // Not interactive mode, based on provided arguments
     if !args.interactive {
+        // Check if api key is in cache
         if !(cache::get_api_key()
             .expect("Error while getting api key")
             .len()
@@ -107,16 +121,15 @@ fn main() -> Result<ExitCode, Box<dyn std::error::Error>> {
             println!("API Key is not set up!");
             return Ok(ExitCode::FAILURE);
         }
-        if args.list && args.list_rates.is_some(){
-            println!("Can't use --list with --list-rates");
-            return Ok(ExitCode::FAILURE);
-        }
+        // List currencies with --list
         if args.list {
             let currencies = cache::list_currencies()?;
             for currency in currencies {
                 println!("{} - {}", currency[0], currency[1]);
-            }
-        } else if args.list_rates.is_some() {
+            }        
+        } 
+        // List rates for currency with --list-rates <code>
+        else if args.list_rates.is_some() {
             let code = args.list_rates.unwrap().clone();
             let check = check_code(&code)?;
             if !check {
@@ -128,10 +141,14 @@ fn main() -> Result<ExitCode, Box<dyn std::error::Error>> {
             for rate in rates {
                 println!("{} to {} rate: {}", code, rate[0], rate[1]);
             }
-        } else if wrong_args {
+        } 
+        // Check if all 3 args are provided
+        else if wrong_args {
             println!("Not all args specified, provide 'currency from', 'currency to' and 'amount'");
             return Ok(ExitCode::FAILURE);
-        } else if all_args {
+        } 
+        // Do conversion
+        else if all_args {
             convert_value(
                 &args.currency_from.unwrap().to_uppercase(),
                 &args.currency_to.unwrap().to_uppercase(),
