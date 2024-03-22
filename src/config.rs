@@ -7,6 +7,18 @@ pub const CACHE_LOCATION_ENV_NAME: &str = "CURRENCY_CACHE";
 pub const REST_ENDPOINT: &str = "https://v6.exchangerate-api.com/v6/";
 pub const REST_ENDPOINT_ENV_NAME: &str = "CURRENCY_ENDPOINT";
 
+#[cfg(not(windows))]
+#[macro_export]
+macro_rules! main_separator{
+    ()=>{"/"}
+}
+
+#[cfg(windows)]
+#[macro_export]
+macro_rules! main_separator{
+    ()=>{r#"\"#}
+}
+
 pub fn get_endpoint() -> String {
     let ret: String;
     match var_os(REST_ENDPOINT_ENV_NAME) {

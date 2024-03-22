@@ -6,8 +6,9 @@ use crate::{
 };
 use cache::check_code;
 use clap::Parser;
-use exchange::convert_value;
+use exchange::{convert_value, print_result};
 mod cache;
+#[macro_use]
 mod config;
 mod exchange;
 mod requests;
@@ -149,11 +150,11 @@ fn main() -> Result<ExitCode, Box<dyn std::error::Error>> {
         } 
         // Do conversion
         else if all_args {
-            convert_value(
+            print_result(convert_value(
                 &args.currency_from.unwrap().to_uppercase(),
                 &args.currency_to.unwrap().to_uppercase(),
                 &args.value.unwrap(),
-            )
+            ))
         }
     } else {
         interactive()?;
@@ -229,7 +230,7 @@ fn interactive() -> Result<(), Box<dyn std::error::Error>> {
             amount_check = true
         }
     }
-    convert_value(&code_from, &code_to, &amount);
+    print_result(convert_value(&code_from, &code_to, &amount));
 
     Ok(())
 }

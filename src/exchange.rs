@@ -1,6 +1,12 @@
 use crate::*;
 use rust_decimal::prelude::*;
 use rusty_money::{iso::find, ExchangeRate, Money};
+pub struct Result {
+    pub from: String,
+    pub to: String,
+    pub rate: String
+}
+
 pub fn update_rate(code: &String) {
     if cache::get_next_update(code).expect("Error getting next update time from cache")
         <= config::get_current_time()
@@ -32,7 +38,7 @@ pub fn get_rate(code_from: &String, code_to: &String) -> String {
     cache::get_rate(code_from, code_to).expect("Error when getting cached rate")
 }
 
-pub fn convert_value(code_from: &String, code_to: &String, value: &String) {
+pub fn convert_value(code_from: &String, code_to: &String, value: &String) -> Result{
     if value.parse::<f64>().is_err() {
         panic!("{} is not a number!", value);
     }
@@ -49,13 +55,22 @@ pub fn convert_value(code_from: &String, code_to: &String, value: &String) {
     let rate = Decimal::from_str(&text_rate).unwrap();
     let dec_amount = Decimal::from_str(&value).unwrap();
     let from_money = Money::from_decimal(dec_amount, from_currency.unwrap());
-    println!("Input: {}", from_money.to_string());
+    let mut ret: Result = Result { from: String::new(), to: String::new(), rate: String::new()};
+    ret.from = from_money.to_string();
     if code_from != code_to {
         let ex = ExchangeRate::new(from_currency.unwrap(), to_currency.unwrap(), rate).unwrap();
         let result = ex.convert(from_money).expect("Error while conversion");
-        println!("Equals: {}", result.to_string())
+        ret.to = result.to_string();
     } else {
-        println!("Equals: {}", from_money.to_string())
+        ret.to = from_money.to_string();
     }
-    println!("Exchange rate: {}", text_rate);
+    ret.rate = text_rate;
+    ret
+}
+
+pub fn print_result(res:Result)
+{
+    println!("Input: {}", res.from);
+    println!("Equals: {}", res.to);
+    println!("Exchange rate: {}", res.rate);
 }
