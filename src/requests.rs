@@ -29,56 +29,57 @@ struct Err {
     error_type: String,
 }
 #[cfg(test)]
-fn mock_get_rates(code: &String) -> Result<Status, reqwest::Error> {
-    let response: ConversionRates = match code.as_str() {
-        "PLN" => serde_json::from_str(include_str!(concat!(
-            ".",
-            crate::main_separator!(),
-            "mock_data",
-            crate::main_separator!(),
-            "PLN.json"
-        )))
-        .expect("Error when deserializng"),
-        "EUR" => serde_json::from_str(include_str!(concat!(
-            ".",
-            crate::main_separator!(),
-            "mock_data",
-            crate::main_separator!(),
-            "EUR.json"
-        )))
-        .expect("Error when deserializng"),
-        _ => {
-            panic!("Unknown code")
-        }
-    };
-    cache::add_rates(
-        response.time_next_update_unix,
-        &response.base_code,
-        &response.conversion_rates,
-    )
-    .expect("Error while caching response");
-    Ok(Status::OK)
-}
-#[cfg(test)]
-pub fn mock_get_currencies() -> Result<Status, reqwest::Error> {
-    let codes: CurrencyCodes = serde_json::from_str(include_str!(concat!(
-        ".",
-        crate::main_separator!(),
-        "mock_data",
-        crate::main_separator!(),
-        "codes.json"
-    )))
-    .expect("Error when deserializng");
-    for code in codes.supported_codes {
-        cache::add_code(code).expect("Error when adding code to cache");
+mod test {
+    pub fn mock_get_rates(code: &String) -> Result<super::Status, reqwest::Error> {
+        let response: super::ConversionRates = match code.as_str() {
+            "PLN" => serde_json::from_str(include_str!(concat!(
+                ".",
+                crate::main_separator!(),
+                "mock_data",
+                crate::main_separator!(),
+                "PLN.json"
+            )))
+            .expect("Error when deserializng"),
+            "EUR" => serde_json::from_str(include_str!(concat!(
+                ".",
+                crate::main_separator!(),
+                "mock_data",
+                crate::main_separator!(),
+                "EUR.json"
+            )))
+            .expect("Error when deserializng"),
+            _ => {
+                panic!("Unknown code")
+            }
+        };
+        crate::cache::add_rates(
+            response.time_next_update_unix,
+            &response.base_code,
+            &response.conversion_rates,
+        )
+        .expect("Error while caching response");
+        Ok(super::Status::OK)
     }
-    return Ok(Status::OK);
+    pub fn mock_get_currencies() -> Result<super::Status, reqwest::Error> {
+        let codes: super::CurrencyCodes = serde_json::from_str(include_str!(concat!(
+            ".",
+            crate::main_separator!(),
+            "mock_data",
+            crate::main_separator!(),
+            "codes.json"
+        )))
+        .expect("Error when deserializng");
+        for code in codes.supported_codes {
+            crate::cache::add_code(code).expect("Error when adding code to cache");
+        }
+        return Ok(super::Status::OK);
+    }
 }
 
 pub fn get_rates(code: &String) -> Result<Status, reqwest::Error> {
     if cfg!(test) {
         #[cfg(test)]
-        return mock_get_rates(code);
+        return test::mock_get_rates(code);
     }
     let response = reqwest::blocking::get(format!(
         "{}{}{}{}",
@@ -111,7 +112,7 @@ pub fn get_rates(code: &String) -> Result<Status, reqwest::Error> {
 pub fn get_currencies() -> Result<Status, reqwest::Error> {
     if cfg!(test) {
         #[cfg(test)]
-        return mock_get_currencies();
+        return test::mock_get_currencies();
     }
     let response = reqwest::blocking::get(format!(
         "{}{}{}",
